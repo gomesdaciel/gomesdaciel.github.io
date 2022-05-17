@@ -1,3 +1,3 @@
-## Processamento Digital de Imagens
+## Tópicos:
 
 [PDI](https://gomesdaciel.github.io/pdi)
