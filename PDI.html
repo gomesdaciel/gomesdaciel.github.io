@@ -461,8 +461,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_2_preenchimento_de_regiões">2. Preenchimento de regiões</a>
 <ul class="sectlevel2">
-<li><a href="#_2_1_problemas">2.1 Problemas</a></li>
-<li><a href="#_2_1_contar_bolhas">2.1. Contar bolhas</a></li>
+<li><a href="#_2_1_rotulação_de_objetos_em_imagens_em_tons_de_cinza">2.1. Rotulação de objetos em imagens em tons de cinza</a></li>
+<li><a href="#_2_2_contagem_de_bolhas">2.2. Contagem de bolhas</a></li>
 <li><a href="#_2_2_contar_bolhas_com_buracos">2.2. Contar bolhas com buracos</a></li>
 </ul>
 </li>
@@ -480,7 +480,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_5_filtragem_no_domínio_espacial_ii">5. Filtragem no domínio espacial II</a>
 <ul class="sectlevel2">
 <li><a href="#_5_1_tilt_shift_em_imagem">5.1. <em>Tilt-shift</em> em imagem</a></li>
-<li><a href="#_5_2_tilt_shift_em_vídeo">5.2. <em>Tilt-shift</em> em vídeo</a></li>
 </ul>
 </li>
 <li><a href="#_6_filtragem_no_domínio_da_frequência">6. Filtragem no domínio da frequência</a></li>
@@ -659,7 +658,7 @@ outputImage = np.concatenate((bottomImage, topImage), axis=0)</code></pre>
 <p>Foram trabalhados os conceitos de rotulação a partir da técnica de modificação chamada <em>floodfill</em>, além da utilização de laços para percorrer todos os pixels da imagem. Somado a isso, conseguir identificar objetos com características específicas, nesse caso a identificação de bolhas com buracos.</p>
 </div>
 <div class="sect2 data-line-115">
-<h3 id="_2_1_problemas">2.1 Problemas</h3>
+<h3 id="_2_1_rotulação_de_objetos_em_imagens_em_tons_de_cinza">2.1. Rotulação de objetos em imagens em tons de cinza</h3>
 <div class="paragraph data-line-116">
 <p>Um dos problemas no processo de rotulação de imagens em tons de cinza é o número limite de objetos que podem ser categorizados. Uma vez que o espectro de tons de cinza de uma imagem em preto e branco varia entre 0 e 255, precisamos encontrar alternativas que nos permitam contornar as situações em que existam mais do que 255 objetos em cena.</p>
 </div>
@@ -668,73 +667,88 @@ outputImage = np.concatenate((bottomImage, topImage), axis=0)</code></pre>
 </div>
 </div>
 <div class="sect2 data-line-120">
-<h3 id="_2_1_contar_bolhas">2.1. Contar bolhas</h3>
-<div class="imageblock data-line-123">
+<h3 id="_2_2_contagem_de_bolhas">2.2. Contagem de bolhas</h3>
+<div class="paragraph data-line-121">
+<p>Nessa etapa, veremos quais foram os passos adotados para que pudéssemos quantificar as regiões com e sem buracos internos na Figura 4.</p>
+</div>
+<div class="imageblock data-line-125">
 <div class="content">
 <img src="./labeling/bolhas.png" alt="Bolhas">
 </div>
 <div class="title">Figure 4. imagem utilizada</div>
 </div>
 </div>
-<div class="sect2 data-line-124">
+<div class="sect2 data-line-126">
 <h3 id="_2_2_contar_bolhas_com_buracos">2.2. Contar bolhas com buracos</h3>
-
+<div class="paragraph data-line-128">
+<p>Primeiro, removem-se as bolhas que tocam as bordas.</p>
+</div>
+<div class="listingblock data-line-131">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># Retirando as bolhas que tocam as bordas
+for y in range(py):
+    for x in range(px):
+        if (y == 0 or x == 0 or y == (py - 1) or x == (px - 1)) and img[y, x] == 255:
+            cv.floodFill(img, None, (x, y), 0)
+            # Parâmetros do método cv2.floodFill: imagem, máscara (None), (altura, largura), cor (0 a 255)</code></pre>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-126">
+</div>
+</div>
+<div class="sect1 data-line-140">
 <h2 id="_3_manipulação_de_histogramas">3. Manipulação de Histogramas</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-127">
+<div class="paragraph data-line-141">
 <p>O objetivo desse exercício é para aprender como mostrar e tratar histogramas de imagens com a utilização do OpenCV, somado a possibilidade de tratamento em tempo real de um vídeo capturado a partir da webcam do usuário.</p>
 </div>
-<div class="paragraph data-line-129">
+<div class="paragraph data-line-143">
 <p>Nessa parte  do trabalho foi necesário realizar a equalização de histogramas e fazer a exibição da imagem equalizada e a identificação de movimentações a partir da comparação dos histogramas dos diferentes frames da captura da webcam.</p>
 </div>
-<div class="sect2 data-line-131">
+<div class="sect2 data-line-145">
 <h3 id="_3_1_equalização_de_histogramas">3.1. Equalização de Histogramas</h3>
 
 </div>
-<div class="sect2 data-line-135">
+<div class="sect2 data-line-149">
 <h3 id="_3_2_detecção_de_movimento">3.2. Detecção de movimento</h3>
 
 </div>
 </div>
 </div>
-<div class="sect1 data-line-137">
+<div class="sect1 data-line-151">
 <h2 id="_4_filtragem_no_domínio_espacial_i">4. Filtragem no domínio espacial I</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-138">
+<div class="paragraph data-line-152">
 <p>No quarto exercício foram trabalhados os conceitos de convolução para a manipulação da imagem no espaço. Esse processo no processamento digital de imagens é feito a partir da utilização de máscaras com dimensão de tamanho ímpar (geralmente 3x3 ou 5x5) em que se percorre pixel a pixel utilizando os valores da matríz da máscara no pixel escolhido e na sua vizinhança.</p>
 </div>
-<div class="imageblock data-line-142">
+<div class="imageblock data-line-156">
 <div class="content">
 <img src="./laplgauss/mascaras.svg" alt="Máscaras">
 </div>
 <div class="title">Figure 5. Demonstração do funcionamento dos filtros</div>
 </div>
-<div class="paragraph data-line-144">
+<div class="paragraph data-line-158">
 <p>Com esse tipo de manipulação é possível conseguir diversos resultados diferentes, como: borramento, aguçamento, detecção de borda, etc.</p>
 </div>
-<div class="paragraph data-line-146">
+<div class="paragraph data-line-160">
 <p>Nessa etapa foi implementado um script contendo os filtros media, gaussiano, laplaciano, sobel x, sobel y e boost. Porém, para efeitos de atividade, foi utilizado apenas laplaciano e gaussiano.</p>
 </div>
-<div class="paragraph data-line-148">
+<div class="paragraph data-line-162">
 <p>A aplicação do código foi feito para realização ao vivo das manipulações a partir das imagens obtidas pelas Webcam, mas para fazer a demonstração aqui capturamos apenas um frame:</p>
 </div>
-<div class="imageblock data-line-152">
+<div class="imageblock data-line-166">
 <div class="content">
 <img src="./laplgauss/webcam.png" alt="webcam">
 </div>
 <div class="title">Figure 6. Imagem utilizada para demonstração dos filtros</div>
 </div>
-<div class="sect2 data-line-154">
+<div class="sect2 data-line-168">
 <h3 id="_4_1_laplaciano_no_gaussiano">4.1. Laplaciano no Gaussiano</h3>
-<div class="paragraph data-line-155">
-<p>Aplicar o filtro gaussiano na imagem e depois o filtro laplaciano.<br>
+<div class="paragraph data-line-169">
+<p>Aplicar o filtro gaussiano na imagem e depois o filtro laplaciano. A principal ideia desse teste é para identificar a diferença de realizar <br>
 No início de tudo, utilizando mais uma vez a biblioteca <em>NumPy</em>, dessa vez acompanhada pela função <em>.array()</em>, definimos os valores da matriz que compõem as máscaras que correspondem aos filtros gaussiano e laplaciano:</p>
 </div>
-<div class="listingblock data-line-158">
+<div class="listingblock data-line-172">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">gauss = np.array([[0.0625, 0.125, 0.0625]
                  ,[0.125,  0.25,  0.125]
@@ -745,10 +759,10 @@ laplacian = np.array([[ 0, -1,  0]
                      ,[ 0, -1,  0]])</code></pre>
 </div>
 </div>
-<div class="paragraph data-line-168">
+<div class="paragraph data-line-182">
 <p>Em seguida, montamos o código que mantém a leitura das imagens produzidas pela Webcam colocando a visualização dentro de um <em>While</em> para fazer com que permaneça exibindo as imagens. Usamos a função <em>.read()</em> que retorna duas informações, a primeira um booleano com o sucesso ou não da leitura e a segunda o frame propriamente dito.{allow-uri-read}</p>
 </div>
-<div class="listingblock data-line-171">
+<div class="listingblock data-line-185">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">cap = cv.VideoCapture(0)
 
@@ -760,89 +774,99 @@ if cap.isOpened():
         cv.imshow('Webcam', gray)</code></pre>
 </div>
 </div>
-<div class="paragraph data-line-182">
-<p>É possível observar que fizemos a leitura da imagem tamém em tons de cinza. Em seguida fizemos a aplicação do filtro laplaciano para servir de comparação com o resultado final e geramos a imagem com o filtro gaussiano que será processada posteriormente.</p>
+<div class="paragraph data-line-196">
+<p>É possível observar que fizemos a leitura da imagem também em tons de cinza. Em seguida fizemos a aplicação do filtro laplaciano para servir de comparação com o resultado final e geramos a imagem com o filtro gaussiano que será processada posteriormente.</p>
 </div>
-<div class="listingblock data-line-185">
+<div class="listingblock data-line-199">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">laplaciano = cv.filter2D(gray, -1, laplacian)
 gaussiano = cv.filter2D(gray, -1, gauss)</code></pre>
 </div>
 </div>
-<div class="paragraph data-line-190">
-<p>O OpenCV tem uma função própria que serve para aplicação dos tipos de filtros que estamos tratando aqui, chamada de <em>cv.filter2D()</em>. Essa função recebe os parâmetros a imagem a ser tratada, a profundidade da imagem (por padrão, -1 retorna )</p>
+<div class="paragraph data-line-204">
+<p>O OpenCV tem uma função própria que serve para aplicação dos tipos de filtros que estamos tratando aqui, chamada de <em>cv.filter2D()</em>. Essa função recebe como parâmetros a imagem a ser tratada, a profundidade da imagem (por padrão, -1 retorna a nova imagem com a mesma profundidade e a máscara a ser utilziado).</p>
 </div>
-<div class="paragraph data-line-192">
+<div class="paragraph data-line-206">
 <p>Resultados:</p>
 </div>
-<div class="imageblock data-line-196">
+<div class="imageblock data-line-210">
 <div class="content">
 <img src="./laplgauss/gaussiano.png" alt="gaussiano">
 </div>
 <div class="title">Figure 7. Imagem com o efeito gaussiano (borramento)</div>
 </div>
-<div class="paragraph data-line-200">
-<div class="title">Imagem com o efeito laplaciano (detecção de bordas)</div>
-<p>image::gausacianosianolaplacianosiano]</p>
+<div class="imageblock data-line-214">
+<div class="content">
+<img src="./laplgauss/laplaciano.png" alt="laplaciano">
+</div>
+<div class="title">Figure 8. Imagem com o efeito laplaciano (detecção de bordas)</div>
+</div>
+<div class="paragraph data-line-216">
+<p>Após isso, aplicamos o laplaciano em cima da imagem gerada pelo gaussiano. Dando o seguinte resultado:</p>
+</div>
+<div class="listingblock data-line-219">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">laplacianoDoGaussiano = cv.filter2D(gaussiano, -1, laplacian)</code></pre>
+</div>
+</div>
+<div class="imageblock data-line-225">
+<div class="content">
+<img src="./laplgauss/laplaciano-do-gaussiano.png" alt="laplaciano do gaussiano">
+</div>
+<div class="title">Figure 9. Imagem do laplaciano do gaussiano</div>
+</div>
+<div class="paragraph data-line-227">
+<p>Embora possa parecer uma imagem de mais difícil visualização a olho humano, essa imagem possui menos ruídos e é melhor para fazer outras manipulações a posteriori. Isso se dá porque o borramento aplicado permite uma suavização de possíveis falsos contornos, evitando que eles apareçam ao uilizar o laplaciano atual, por isso a imagem fica melhor.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-202">
+<div class="sect1 data-line-229">
 <h2 id="_5_filtragem_no_domínio_espacial_ii">5. Filtragem no domínio espacial II</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-203">
+<div class="paragraph data-line-230">
 <p>Seguindo com a utilização da filtragem em domínio espacial, foi explorado uma aplicação desses filtros para a criação de efeitos visuais interessantes, como o <em>tilt-shift</em>.</p>
 </div>
-<div class="paragraph data-line-205">
+<div class="paragraph data-line-232">
 <p>O <em>tilt-shift</em> se configura como o borramento de duas áreas de uma imagem para dar a impressão de que o que está sendo exibido entre os borramentos é uma miniatura, ou uma maquete. Alguns parâmetros que podem ser modificados são: inclinação do borramento, altura do borramento, tamanho da área entre os borrados e força da transição.</p>
 </div>
-<div class="sect2 data-line-207">
+<div class="sect2 data-line-234">
 <h3 id="_5_1_tilt_shift_em_imagem">5.1. <em>Tilt-shift</em> em imagem</h3>
-
-</div>
-<div class="sect2 data-line-209">
-<h3 id="_5_2_tilt_shift_em_vídeo">5.2. <em>Tilt-shift</em> em vídeo</h3>
-
+<div class="paragraph data-line-235">
+<p>Criamos uma função para servir de
+=== 5.2. <em>Tilt-shift</em> em vídeo</p>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-211">
+</div>
+<div class="sect1 data-line-238">
 <h2 id="_6_filtragem_no_domínio_da_frequência">6. Filtragem no domínio da frequência</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-212">
+<div class="paragraph data-line-239">
 <p>Em breve</p>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-214">
+<div class="sect1 data-line-241">
 <h2 id="_7_detecção_de_bordas_com_o_algoritmo_de_canny">7. Detecção de bordas com o algoritmo de Canny</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-215">
+<div class="paragraph data-line-242">
 <p>Em breve</p>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-217">
+<div class="sect1 data-line-244">
 <h2 id="_8_quantização_vetorial_com_k_means">8. Quantização vetorial com k-means</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-218">
+<div class="paragraph data-line-245">
 <p>Em breve</p>
-</div>
-<div class="listingblock data-line-223">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import cv2
-import numpy
-
-print (teste)</code></pre>
-</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-05-30 23:08:41 -0300
+Last updated 2022-05-31 00:08:12 -0300
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
