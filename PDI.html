@@ -839,44 +839,94 @@ cv.normalize(r_hist, r_hist, alpha=0, beta=hist_h, norm_type=cv.NORM_MINMAX)</co
 </div>
 <div class="sect2 data-line-256">
 <h3 id="_3_2_detecção_de_movimento">3.2. Detecção de movimento</h3>
-
+<div class="paragraph data-line-257">
+<p>A detecção de movimento com a utilização de histogramas baseia-se na comparação entre os histogramas calculados para cada <em>frame</em> capturado em sequência.</p>
+</div>
+<div class="paragraph data-line-259">
+<p>Posto isso, armazenamos o primeiro <em>frame</em> apanhado pelo método <em>cv.VideoCapture()</em> em uma variável auxiliar (<em>gray</em>).</p>
+</div>
+<div class="listingblock data-line-262">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">cap = cv.VideoCapture(0)
+gray = cap.read()[1] # recebe o primeiro frame</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-267">
+<p>Dessa forma, dentro da estrutura de repetição, estabelece-se uma nova variável (<em>gray_comp</em>), responsável pelo armazenamento do <em>frame</em> anterior&#8201;&#8212;&#8201;que, na primeira iteração, é o <em>frame</em> armazenado fora do laço&#8201;&#8212;&#8201; e atribui-se o <em>frame</em> atual à variável <em>gray</em>.</p>
+</div>
+<div class="listingblock data-line-270">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">gray_compare = gray # recebe o frame anterior
+gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY) # recebe o frame atual</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-275">
+<p>Prosseguindo, aplicam-se todas as etapas relatadas na seção 3.1 para a criação e exibição de histogramas para as duas imagens (<em>gray_comp</em> e <em>gray</em>). Contudo, adiciona-se a esses passos a comparação entre os histogramas de cada cena.</p>
+</div>
+<div class="listingblock data-line-278">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># Comparação dos histogramas
+metric_val = cv.compareHist(hist_comp, hist, cv.HISTCMP_CORREL)
+if metric_val &lt; 0.90:
+    gray = cv.flip(gray, 1) # inverte a image horizontalmente
+    cv.putText(gray, 'Movimento detectado!', (200, 400), cv.FONT_ITALIC, 1, (0, 255, 255), thickness=2)
+    cv.imshow('Webcam', gray)
+    cv.imshow('calcHist Demo', histImage)
+else:
+    # Exibe a imagem capturada pela webcam
+    cv.imshow('Webcam', cv.flip(gray, 1))
+    # Exibe o histograma
+    cv.imshow('calcHist Demo', histImage)
+if cv.waitKey(100) == ord('q'): # retorna um número inteiro representando o ponto de código Unicode desse caractere
+    break</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-295">
+<p>Onde a variável <em>_metric_val</em> estabelece o parâmetro de diferenciação entre os histogramas. É exibida uma mensagem de dectecção de movimento sempre que esse valor recua para abaixo da linha inferior de 0.90.</p>
+</div>
+<div class="imageblock data-line-299">
+<div class="content">
+<img src="./motiondetector/detectando-movimento.gif" alt="detectando movimento">
+</div>
+<div class="title">Figure 9. Detectando movimento através da comparação entre histogramas.</div>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-258">
+</div>
+<div class="sect1 data-line-301">
 <h2 id="_4_filtragem_no_domínio_espacial_i">4. Filtragem no domínio espacial I</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-259">
+<div class="paragraph data-line-302">
 <p>No quarto exercício foram trabalhados os conceitos de convolução para a manipulação da imagem no espaço. Esse processo no processamento digital de imagens é feito a partir da utilização de máscaras com dimensão de tamanho ímpar (geralmente 3x3 ou 5x5) em que se percorre pixel a pixel utilizando os valores da matríz da máscara no pixel escolhido e na sua vizinhança.</p>
 </div>
-<div class="imageblock data-line-263">
+<div class="imageblock data-line-306">
 <div class="content">
 <img src="./laplgauss/mascaras.svg" alt="Máscaras">
 </div>
-<div class="title">Figure 9. Demonstração do funcionamento dos filtros</div>
+<div class="title">Figure 10. Demonstração do funcionamento dos filtros</div>
 </div>
-<div class="paragraph data-line-265">
+<div class="paragraph data-line-308">
 <p>Com esse tipo de manipulação é possível conseguir diversos resultados diferentes, como: borramento, aguçamento, detecção de borda, etc.</p>
 </div>
-<div class="paragraph data-line-267">
+<div class="paragraph data-line-310">
 <p>Nessa etapa foi implementado um script contendo os filtros media, gaussiano, laplaciano, sobel x, sobel y e boost. Porém, para efeitos de atividade, foi utilizado apenas laplaciano e gaussiano.</p>
 </div>
-<div class="paragraph data-line-269">
+<div class="paragraph data-line-312">
 <p>A aplicação do código foi feito para realização ao vivo das manipulações a partir das imagens obtidas pelas Webcam, mas para fazer a demonstração aqui capturamos apenas um frame:</p>
 </div>
-<div class="imageblock data-line-273">
+<div class="imageblock data-line-316">
 <div class="content">
 <img src="./laplgauss/webcam.png" alt="webcam">
 </div>
-<div class="title">Figure 10. Imagem utilizada para demonstração dos filtros</div>
+<div class="title">Figure 11. Imagem utilizada para demonstração dos filtros</div>
 </div>
-<div class="sect2 data-line-275">
+<div class="sect2 data-line-318">
 <h3 id="_4_1_laplaciano_no_gaussiano">4.1. Laplaciano no Gaussiano</h3>
-<div class="paragraph data-line-276">
+<div class="paragraph data-line-319">
 <p>Aplicar o filtro gaussiano na imagem e depois o filtro laplaciano. A principal ideia desse teste é para identificar a diferença de realizar <br>
 No início de tudo, utilizando mais uma vez a biblioteca <em>NumPy</em>, dessa vez acompanhada pela função <em>.array()</em>, definimos os valores da matriz que compõem as máscaras que correspondem aos filtros gaussiano e laplaciano:</p>
 </div>
-<div class="listingblock data-line-279">
+<div class="listingblock data-line-322">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">gauss = np.array([[0.0625, 0.125, 0.0625]
                  ,[0.125,  0.25,  0.125]
@@ -887,10 +937,10 @@ laplacian = np.array([[ 0, -1,  0]
                      ,[ 0, -1,  0]])</code></pre>
 </div>
 </div>
-<div class="paragraph data-line-289">
+<div class="paragraph data-line-332">
 <p>Em seguida, montamos o código que mantém a leitura das imagens produzidas pela Webcam colocando a visualização dentro de um <em>While</em> para fazer com que permaneça exibindo as imagens. Usamos a função <em>.read()</em> que retorna duas informações, a primeira um booleano com o sucesso ou não da leitura e a segunda o frame propriamente dito.{allow-uri-read}</p>
 </div>
-<div class="listingblock data-line-292">
+<div class="listingblock data-line-335">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">cap = cv.VideoCapture(0)
 
@@ -902,74 +952,74 @@ if cap.isOpened():
         cv.imshow('Webcam', gray)</code></pre>
 </div>
 </div>
-<div class="paragraph data-line-303">
+<div class="paragraph data-line-346">
 <p>É possível observar que fizemos a leitura da imagem também em tons de cinza. Em seguida fizemos a aplicação do filtro laplaciano para servir de comparação com o resultado final e geramos a imagem com o filtro gaussiano que será processada posteriormente.</p>
 </div>
-<div class="listingblock data-line-306">
+<div class="listingblock data-line-349">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">laplaciano = cv.filter2D(gray, -1, laplacian)
 gaussiano = cv.filter2D(gray, -1, gauss)</code></pre>
 </div>
 </div>
-<div class="paragraph data-line-311">
+<div class="paragraph data-line-354">
 <p>O OpenCV tem uma função própria que serve para aplicação dos tipos de filtros que estamos tratando aqui, chamada de <em>cv.filter2D()</em>. Essa função recebe como parâmetros a imagem a ser tratada, a profundidade da imagem (por padrão, -1 retorna a nova imagem com a mesma profundidade e a máscara a ser utilziado).</p>
 </div>
-<div class="paragraph data-line-313">
+<div class="paragraph data-line-356">
 <p>Resultados:</p>
 </div>
-<div class="imageblock data-line-317">
+<div class="imageblock data-line-360">
 <div class="content">
 <img src="./laplgauss/gaussiano.png" alt="gaussiano">
 </div>
-<div class="title">Figure 11. Imagem com o efeito gaussiano (borramento)</div>
+<div class="title">Figure 12. Imagem com o efeito gaussiano (borramento)</div>
 </div>
-<div class="imageblock data-line-321">
+<div class="imageblock data-line-364">
 <div class="content">
 <img src="./laplgauss/laplaciano.png" alt="laplaciano">
 </div>
-<div class="title">Figure 12. Imagem com o efeito laplaciano (detecção de bordas)</div>
+<div class="title">Figure 13. Imagem com o efeito laplaciano (detecção de bordas)</div>
 </div>
-<div class="paragraph data-line-323">
+<div class="paragraph data-line-366">
 <p>Após isso, aplicamos o laplaciano em cima da imagem gerada pelo gaussiano. Dando o seguinte resultado:</p>
 </div>
-<div class="listingblock data-line-326">
+<div class="listingblock data-line-369">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">laplacianoDoGaussiano = cv.filter2D(gaussiano, -1, laplacian)</code></pre>
 </div>
 </div>
-<div class="imageblock data-line-332">
+<div class="imageblock data-line-375">
 <div class="content">
 <img src="./laplgauss/laplaciano-do-gaussiano.png" alt="laplaciano do gaussiano">
 </div>
-<div class="title">Figure 13. Imagem do laplaciano do gaussiano</div>
+<div class="title">Figure 14. Imagem do laplaciano do gaussiano</div>
 </div>
-<div class="paragraph data-line-334">
+<div class="paragraph data-line-377">
 <p>Embora possa parecer uma imagem de mais difícil visualização a olho humano, essa imagem possui menos ruídos e é melhor para fazer outras manipulações a posteriori. Isso se dá porque o borramento aplicado permite uma suavização de possíveis falsos contornos, evitando que eles apareçam ao uilizar o laplaciano atual, por isso a imagem fica melhor.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-336">
+<div class="sect1 data-line-379">
 <h2 id="_5_filtragem_no_domínio_espacial_ii">5. Filtragem no domínio espacial II</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-337">
+<div class="paragraph data-line-380">
 <p>Seguindo com a utilização da filtragem em domínio espacial, foi explorado uma aplicação desses filtros para a criação de efeitos visuais interessantes, como o <em>tilt-shift</em>.</p>
 </div>
-<div class="paragraph data-line-339">
+<div class="paragraph data-line-382">
 <p>O <em>tilt-shift</em> se configura como o borramento de duas áreas de uma imagem para dar a impressão de que o que está sendo exibido entre os borramentos é uma miniatura, ou uma maquete. Alguns parâmetros que podem ser modificados são: inclinação do borramento, altura do borramento, tamanho da área entre os borrados e força da transição.</p>
 </div>
-<div class="sect2 data-line-341">
+<div class="sect2 data-line-384">
 <h3 id="_5_1_tilt_shift_em_imagem">5.1. <em>Tilt-shift</em> em imagem</h3>
-<div class="paragraph data-line-342">
+<div class="paragraph data-line-385">
 <p>Para definir os parâmetros citados acima utilizamos quatro trackbars para que o usuário pudesse fazer a visualização e adequação de acordo com a imagem que estava querendo modificar.</p>
 </div>
-<div class="listingblock data-line-346">
+<div class="listingblock data-line-389">
 <div class="title">Uma função de callback</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def callback(x): return None</code></pre>
 </div>
 </div>
-<div class="listingblock data-line-352">
+<div class="listingblock data-line-395">
 <div class="title">TrackBars</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">cv.createTrackbar('l1', 'Controllers', 0, 100, callback)
@@ -978,13 +1028,13 @@ cv.createTrackbar('d', 'Controllers', 0, 100, callback)
 cv.createTrackbar('ksize', 'Controllers', 0, 100, callback)</code></pre>
 </div>
 </div>
-<div class="paragraph data-line-358">
+<div class="paragraph data-line-401">
 <p>A função <em>cv.createTrackbrar()</em> recebe como parâmetros, nessa ordem: Nome da trackbar, a janela que a trackbar estará inclusa, valor mínimo, valor máximo, callback vazio para preencher a função.</p>
 </div>
-<div class="paragraph data-line-360">
+<div class="paragraph data-line-403">
 <p>No nosso código criamos uma função para servir de base para o realização das manipulações feitas pelo <em>tilt-shift</em>.</p>
 </div>
-<div class="listingblock data-line-363">
+<div class="listingblock data-line-406">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def tilt_shift(image, l1, l2, d, ksize=2):
 
@@ -1015,17 +1065,17 @@ cv.createTrackbar('ksize', 'Controllers', 0, 100, callback)</code></pre>
     return cv.convertScaleAbs(image * mask + blur * (1 - mask))</code></pre>
 </div>
 </div>
-<div class="listingblock data-line-395">
+<div class="listingblock data-line-438">
 <div class="title">Uma função de ponderação</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def add_weighted(x, y):
     return ((y * x)/100)</code></pre>
 </div>
 </div>
-<div class="paragraph data-line-401">
+<div class="paragraph data-line-444">
 <p>Após criar todas as estruturas que serão utilizadas para as manipulações desejadas abrimos um laço <em>While</em> que fazia a leitura da imagem original e mostrava sempre a imagem de saída de acordo com os parâmetros setados pelo usuário na barra de valores.</p>
 </div>
-<div class="listingblock data-line-404">
+<div class="listingblock data-line-447">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">while True:
 
@@ -1056,36 +1106,36 @@ cv.createTrackbar('ksize', 'Controllers', 0, 100, callback)</code></pre>
         break</code></pre>
 </div>
 </div>
-<div class="paragraph data-line-434">
+<div class="paragraph data-line-477">
 <p>A função <em>resize</em> foi feita internamente, recebendo como parâmetro a imagem desejada e o tamanho definido em código.</p>
 </div>
 </div>
-<div class="sect2 data-line-436">
+<div class="sect2 data-line-479">
 <h3 id="_5_2_tilt_shift_em_vídeo">5.2. <em>Tilt-shift</em> em vídeo</h3>
 
 </div>
 </div>
 </div>
-<div class="sect1 data-line-438">
+<div class="sect1 data-line-481">
 <h2 id="_6_filtragem_no_domínio_da_frequência">6. Filtragem no domínio da frequência</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-439">
+<div class="paragraph data-line-482">
 <p>Em breve</p>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-441">
+<div class="sect1 data-line-484">
 <h2 id="_7_detecção_de_bordas_com_o_algoritmo_de_canny">7. Detecção de bordas com o algoritmo de Canny</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-442">
+<div class="paragraph data-line-485">
 <p>Em breve</p>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-444">
+<div class="sect1 data-line-487">
 <h2 id="_8_quantização_vetorial_com_k_means">8. Quantização vetorial com k-means</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-445">
+<div class="paragraph data-line-488">
 <p>Em breve</p>
 </div>
 </div>
@@ -1093,7 +1143,7 @@ cv.createTrackbar('ksize', 'Controllers', 0, 100, callback)</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-05 22:33:53 -0300
+Last updated 2022-06-05 23:09:22 -0300
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
