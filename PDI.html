@@ -1011,33 +1011,16 @@ gaussiano = cv.filter2D(gray, -1, gauss)</code></pre>
 <div class="sect2 data-line-384">
 <h3 id="_5_1_tilt_shift_em_imagem">5.1. <em>Tilt-shift</em> em imagem</h3>
 <div class="paragraph data-line-385">
-<p>Para definir os parâmetros citados acima utilizamos quatro trackbars para que o usuário pudesse fazer a visualização e adequação de acordo com a imagem que estava querendo modificar.</p>
+<p>Inicialmente, criou-se uma função com o objetivo de aplicar a técnica de em uma determinada imagem.</p>
 </div>
-<div class="listingblock data-line-389">
-<div class="title">Uma função de callback</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def callback(x): return None</code></pre>
-</div>
-</div>
-<div class="listingblock data-line-395">
-<div class="title">TrackBars</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">cv.createTrackbar('l1', 'Controllers', 0, 100, callback)
-cv.createTrackbar('l2',  'Controllers', 0, 100, callback)
-cv.createTrackbar('d', 'Controllers', 0, 100, callback)
-cv.createTrackbar('ksize', 'Controllers', 0, 100, callback)</code></pre>
-</div>
-</div>
-<div class="paragraph data-line-401">
-<p>A função <em>cv.createTrackbrar()</em> recebe como parâmetros, nessa ordem: Nome da trackbar, a janela que a trackbar estará inclusa, valor mínimo, valor máximo, callback vazio para preencher a função.</p>
-</div>
-<div class="paragraph data-line-403">
-<p>No nosso código criamos uma função para servir de base para o realização das manipulações feitas pelo <em>tilt-shift</em>.</p>
-</div>
-<div class="listingblock data-line-406">
+<div class="listingblock data-line-388">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def tilt_shift(image, l1, l2, d, ksize=2):
 
+    # Cria um vetor com as seguintes características:
+    # start: 0
+    # stop: image.shape[0] - 1
+    # step: 1
     height = np.arange(image.shape[0], dtype=np.float32)
 
     if d == 0:
@@ -1046,6 +1029,8 @@ cv.createTrackbar('ksize', 'Controllers', 0, 100, callback)</code></pre>
     else:
         alpha = (1/2)*(np.tanh((height - l1)/(d)) - np.tanh((height - l2)/(d)))
 
+    # Cria a máscara
+    # Repete cada elemento n vezes, onde n é a quantidade de elementos contidos na dimensão de altura da imagem
     mask = np.repeat(alpha, image.shape[1])
     # Redimensiona a máscara para que ela tenha as mesmas dimensões da imagem
     # Cria uma máscara/matriz de colunas iguais a alpha
@@ -1065,17 +1050,60 @@ cv.createTrackbar('ksize', 'Controllers', 0, 100, callback)</code></pre>
     return cv.convertScaleAbs(image * mask + blur * (1 - mask))</code></pre>
 </div>
 </div>
-<div class="listingblock data-line-438">
-<div class="title">Uma função de ponderação</div>
+<div class="paragraph data-line-423">
+<p>onde:</p>
+</div>
+<div class="ulist data-line-425">
+<ul>
+<li class="data-line-425">
+<p><strong>image</strong>: imagem de entrada;</p>
+</li>
+<li class="data-line-426">
+<p><strong>x1</strong>: limite superior da janela de borramento;</p>
+</li>
+<li class="data-line-427">
+<p><strong>x2</strong>: limite inferior da janela de borramento;</p>
+</li>
+<li class="data-line-428">
+<p><strong>d</strong>: força de decaimento;</p>
+</li>
+<li class="data-line-429">
+<p><strong>ksize</strong>: tamanho da máscara de borramento.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph data-line-431">
+<p>Em seguida, fez-se necessária a criação de uma função de ponderação para que pudéssemos converter o intervalo da barra de rolagem (de 0 a 100) em valores proporcionais as dimensões da imagem de entrada.</p>
+</div>
+<div class="listingblock data-line-434">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def add_weighted(x, y):
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># Função de ponderação
+def add_weighted(x, y):
     return ((y * x)/100)</code></pre>
 </div>
 </div>
-<div class="paragraph data-line-444">
-<p>Após criar todas as estruturas que serão utilizadas para as manipulações desejadas abrimos um laço <em>While</em> que fazia a leitura da imagem original e mostrava sempre a imagem de saída de acordo com os parâmetros setados pelo usuário na barra de valores.</p>
+<div class="paragraph data-line-440">
+<p>Criou-se, também, a função <em>callback()</em>, utillizada como argumento na inicialização das barras de rolagem responsável por controlar cada parâmetro de entrada da função <em>tilt_shift()</em>.</p>
 </div>
-<div class="listingblock data-line-447">
+<div class="listingblock data-line-443">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># Função de callback
+def callback(x): return None
+
+# Cria a janela onde estarão os controladores
+cv.namedWindow('Controllers')
+
+# Cria os controladores
+cv.createTrackbar('l1', 'Controllers', 0, 100, callback)
+cv.createTrackbar('l2',  'Controllers', 0, 100, callback)
+cv.createTrackbar('d', 'Controllers', 0, 100, callback)
+cv.createTrackbar('ksize', 'Controllers', 0, 100, callback)</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-457">
+<p>Em seguida, lê-se o posicionamento das barras de rolagem e aplica-se a função <em>tilt_shift()</em>.</p>
+</div>
+<div class="listingblock data-line-460">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">while True:
 
@@ -1103,39 +1131,128 @@ cv.createTrackbar('ksize', 'Controllers', 0, 100, callback)</code></pre>
     if cv.waitKey(1) == ord('q'): # retorna um número inteiro representando o ponto de código Unicode desse caractere
         # Salva a imagem final
         cv.imwrite('./tiltshift/tilt-shifted.jpg', output_img)
-        break</code></pre>
-</div>
-</div>
-<div class="paragraph data-line-477">
-<p>A função <em>resize</em> foi feita internamente, recebendo como parâmetro a imagem desejada e o tamanho definido em código.</p>
-</div>
-</div>
-<div class="sect2 data-line-479">
-<h3 id="_5_2_tilt_shift_em_vídeo">5.2. <em>Tilt-shift</em> em vídeo</h3>
+        break
 
+cv.destroyAllWindows()</code></pre>
+</div>
+</div>
+<div class="imageblock data-line-494">
+<div class="content">
+<img src="./tiltshift/img6.jpg" alt="img6">
+</div>
+<div class="title">Figure 15. Imagem de entrada.</div>
+</div>
+<div class="imageblock data-line-498">
+<div class="content">
+<img src="./tiltshift/tilt-shifted.jpg" alt="tilt shifted">
+</div>
+<div class="title">Figure 16. Imagem de entrada após a aplicação da técnica de tilt-shift.</div>
+</div>
+</div>
+<div class="sect2 data-line-500">
+<h3 id="_5_2_tilt_shift_em_vídeo">5.2. <em>Tilt-shift</em> em vídeo</h3>
+<div class="paragraph data-line-502">
+<p>De maneira semelhante ao que fora observado na seção anterior, a ideia aplicar os parâmetros da técnica de tilt-shift através de uma função. Porém, dessa vez, para um vídeo.</p>
+</div>
+<div class="paragraph data-line-504">
+<p>Essencialmente, as etapas que mudam entre um algoritmo e outro são a adição do gatilho para gravação de vídeo e a utilização do método cv.VideoCapture(). Além disso, criaram-se duas variáveis para controle de velocidade e redução de frames por segundo. Dessa forma, o script é:</p>
+</div>
+<div class="listingblock data-line-507">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># Estabelece o gatilho para iniciar a gravação
+record = False
+
+# Inicializa um objeto VideoCapture
+cap = cv.VideoCapture('./tiltshiftvideo/video.mp4')
+
+if not cap.isOpened():
+    print('Falha ao tentar abrir o vídeo.')
+
+frame_width = int(cap.get(3))
+frame_height = int(cap.get(4))
+
+# Estabelece os parâmetros necessários para salvar o vídeo
+out = cv.VideoWriter('./tiltshiftvideo/video-saida.avi', cv.VideoWriter_fourcc('M','J','P','G'), 30, (frame_width,frame_height))
+
+# Variáveis para controle de velocidade
+speed_controller = 6
+speed_ratio = 0
+
+while True:
+    ret, frame = cap.read()
+    # ret: variável booleana. Retorna True se o frame é lido corretamente
+    if ret:
+        # Verifica se o resto da divisão entre as variáveis é zero
+        if speed_ratio % speed_controller == 0:
+            # Recebe os valores da barra de rolagem
+            l1 = cv.getTrackbarPos('l1', 'Controllers')
+            l2 = cv.getTrackbarPos('l2', 'Controllers')
+            d = cv.getTrackbarPos('d', 'Controllers')
+            ksize = cv.getTrackbarPos('ksize', 'Controllers')
+
+            # Aplica a função de ponderação
+            l1 = add_weighted(x=l1, y=(frame.shape[0]))
+            l2 = add_weighted(x=l2, y=(frame.shape[0]))
+            l2 = l1 + l2
+
+            # Recebe o resultado da aplicação da técnica de tilt shift
+            img = tilt_shift(image=frame, l1=l1, l2=l2, d=d, ksize=ksize)
+
+            # Exibe a imagem
+            cv.imshow('Output Image', img)
+
+            if cv.waitKey(1) == ord('r'):
+                record = True
+
+            if record:
+                out.write(img)
+
+            # Define a condição de parada: tecla "q"
+            if cv.waitKey(1) == ord('q'):
+                break
+
+            # Incrementa a taxa de velocidade
+            speed_ratio = speed_ratio + 1
+        else:
+            # Incrementa a taxa de velocidade
+            speed_ratio = speed_ratio + 1
+    else:
+        # Reinicia o vídeo
+        cap = cv.VideoCapture('./tiltshiftvideo/video.mp4')</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-570">
+<p>O resultado da aplicação da técnica pode ser visto na animação a seguir.</p>
+</div>
+<div class="imageblock data-line-574">
+<div class="content">
+<img src="./tiltshiftvideo/gif-saida.gif" alt="gif saida">
+</div>
+<div class="title">Figure 17. Imagem de entrada após a aplicação da técnica de tilt-shift.</div>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-481">
+</div>
+<div class="sect1 data-line-576">
 <h2 id="_6_filtragem_no_domínio_da_frequência">6. Filtragem no domínio da frequência</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-482">
+<div class="paragraph data-line-577">
 <p>Em breve</p>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-484">
+<div class="sect1 data-line-579">
 <h2 id="_7_detecção_de_bordas_com_o_algoritmo_de_canny">7. Detecção de bordas com o algoritmo de Canny</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-485">
+<div class="paragraph data-line-580">
 <p>Em breve</p>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-487">
+<div class="sect1 data-line-582">
 <h2 id="_8_quantização_vetorial_com_k_means">8. Quantização vetorial com k-means</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-488">
+<div class="paragraph data-line-583">
 <p>Em breve</p>
 </div>
 </div>
@@ -1143,7 +1260,7 @@ cv.createTrackbar('ksize', 'Controllers', 0, 100, callback)</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-05 23:09:22 -0300
+Last updated 2022-06-06 00:20:52 -0300
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
