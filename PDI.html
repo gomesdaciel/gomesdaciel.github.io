@@ -483,7 +483,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </li>
 <li><a href="#_6_filtragem_no_domínio_da_frequência">6. Filtragem no domínio da frequência</a></li>
-<li><a href="#_7_detecção_de_bordas_com_o_algoritmo_de_canny">7. Detecção de bordas com o algoritmo de Canny</a></li>
+<li><a href="#_7_detecção_de_bordas_com_o_algoritmo_de_canny_e_pontilhismo">7. Detecção de bordas com o algoritmo de Canny e Pontilhismo</a>
+<ul class="sectlevel2">
+<li><a href="#_7_1_detectando_bordas_com_canny">7.1. Detectando bordas com Canny</a></li>
+<li><a href="#_7_2_a_arte_do_pontilhismo">7.2. A arte do Pontilhismo</a></li>
+<li><a href="#_2_3_união_das_técnicnas">2.3. União das técnicnas</a></li>
+</ul>
+</li>
 <li><a href="#_8_quantização_vetorial_com_k_means">8. Quantização vetorial com k-means</a></li>
 </ul>
 </div>
@@ -1242,25 +1248,289 @@ while True:
 </div>
 </div>
 <div class="sect1 data-line-579">
-<h2 id="_7_detecção_de_bordas_com_o_algoritmo_de_canny">7. Detecção de bordas com o algoritmo de Canny</h2>
+<h2 id="_7_detecção_de_bordas_com_o_algoritmo_de_canny_e_pontilhismo">7. Detecção de bordas com o algoritmo de Canny e Pontilhismo</h2>
 <div class="sectionbody">
 <div class="paragraph data-line-580">
-<p>Em breve</p>
+<p>A ideia para essa atividade é misturar a técnica de detecção de bordas de Canny com a arte do pontilhismo, a fim de gerar uma imagem pontilhista com efeito e qualidade melhores.</p>
+</div>
+<div class="sect2 data-line-582">
+<h3 id="_7_1_detectando_bordas_com_canny">7.1. Detectando bordas com Canny</h3>
+<div class="paragraph data-line-583">
+<p>A técnica desenvolvida por Canny é reconhecida como uma das mais rápidos e eficientes no que diz respeito a encontrar descontinuidades em imagens. Como resultado, a técnica retorna uma imagem binária contendo as coordenadas que são pontos de bordas de uma determinada imagem analisada, sastisfazendo alguns parâmetros.</p>
+</div>
+<div class="paragraph data-line-585">
+<p>O seu funcionamento se dá a partir da análise e determinação de máximos locais do gradiente de uma imagem, seguindo alguns passos (Descrito por: Agostinho Brito):</p>
+</div>
+<div class="olist arabic data-line-587">
+<ol class="arabic">
+<li class="data-line-587">
+<p>Convolução com o filtro Gaussiano, cálculo da magnitude e ângulo do gradiente;</p>
+</li>
+<li class="data-line-589">
+<p>Afinação das cristas largas do gradiente;</p>
+<div class="olist loweralpha data-line-591">
+<ol class="loweralpha" type="a">
+<li class="data-line-591">
+<p>Classificação dos pontos quanto às orientações Horizontal, Vertical, +45°, e −45° (intervalos de ±22.5°);</p>
+</li>
+<li class="data-line-593">
+<p>Para os vizinhos na orientação determinada para o pixel, verificar os seus gradientes;</p>
+</li>
+<li class="data-line-595">
+<p>Supressão de não máximos: se o valor da magnitude do gradiente M(x,y) for inferior a pelo menos um de seus vizinhos, faça gN(x,y)=0; caso contrário, faça gN(x,y)=M(x,y). A imagem gN(x,y) é a imagem com supressão;</p>
+</li>
+</ol>
+</div>
+</li>
+<li class="data-line-597">
+<p>Limiarização com histerese é usada para a quebra do contorno (borda tracejada);</p>
+<div class="olist loweralpha data-line-599">
+<ol class="loweralpha" type="a">
+<li class="data-line-599">
+<p>Dois limiares T1 e T2. T1&gt;T2 são usados;</p>
+</li>
+<li class="data-line-601">
+<p>Se o pixel é tal que gN(x,y)≥T1, é assumido como ponto de borda forte;</p>
+</li>
+<li class="data-line-603">
+<p>Para os pixels restantes, aqueles em que gN(x,y)≥T2, são assumidos como ponto de borda fraco.</p>
+</li>
+<li class="data-line-605">
+<p>Para todos os vizinhos dos pontos de borda fraco, procurar nos seus 8-vizinhos se há algum ponto de borda forte. Caso haja, este é marcado como parte da fronteira.</p>
+</li>
+<li class="data-line-607">
+<p>Sugestão de Canny: TH/TL=3/1, ou TH/TL=2/1</p>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph data-line-609">
+<p>A aplicação dessa etapa se dá de uma forma simplificada, uma vez que o OpenCV tem uma função que nos permite realizar essa aplicação, em que foi feito ajustes apenas para a utilização de um slider definidor do limiar.</p>
+</div>
+<div class="listingblock data-line-612">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">cv.namedWindow('CANNY')
+cv.createTrackbar('T', 'CANNY', 20, 255, callback)
+cv.createTrackbar('T', 'CANNY', 20, 255, callback)
+
+while True:
+    img = cv.imread('child.png')
+    canny = cv.Canny(img, i*t, i*t*3)
+    cv.imshow('CANNY', canny)
+    k = cv.waitKey(0)
+    break
+cv.destroyAllWindows()</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-625">
+<p>Basicamente crianos uma janela chamada "CANNY" onde incluímos a trackbar e o resultado das bordas. Segue a imagem original e as suas bordas.</p>
+</div>
+<div class="imageblock data-line-629">
+<div class="content">
+<img src="./canny%20pointilhismo/uvas.jpg" alt="Uvas">
+</div>
+<div class="title">Figure 18. Imagem original</div>
+</div>
+<div class="imageblock data-line-633">
+<div class="content">
+<img src="./canny%20pointilhismo/uvascanny.png" alt="Canny">
+</div>
+<div class="title">Figure 19. Imagem de bordas</div>
+</div>
+</div>
+<div class="sect2 data-line-635">
+<h3 id="_7_2_a_arte_do_pontilhismo">7.2. A arte do Pontilhismo</h3>
+<div class="paragraph data-line-636">
+<p>O pontilhismo é uma técnica de desenho impressionista onde o quadro é pintado usando apenas pontos, utilizamos a técnica de desenvolvimento sugerida pelo professor para conseguir aplicar um efeito semelhante em imagens pré definidas. A ideia é percorrer a imagem e, com base em alguns parâmetros, desenhar circulos com a cor do pixel escolhido.</p>
+</div>
+<div class="listingblock data-line-639">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">altura = img.shape[0]
+largura = img.shape[1]
+point = np.zeros(img.shape, dtype=np.uint8)
+STEP = 5
+RAIO = 3
+JITTER = 3
+
+xrange = np.arange(0, altura-STEP, STEP) + STEP // 2
+yrange = np.arange(0, largura-STEP, STEP) + STEP // 2</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-650">
+<p>Os parâmetros definidos foram:</p>
+</div>
+<div class="olist arabic data-line-652">
+<ol class="arabic">
+<li class="data-line-652">
+<p>STEP: define o tamanho do passo entre os pixels, no nosso caso será escolhido 1 a cada 5 pixels para criar um círculo;</p>
+</li>
+<li class="data-line-653">
+<p>JITTER: deslocamento aleatório em ambas as direções, definido em 3 pixels;</p>
+</li>
+<li class="data-line-654">
+<p>RAIO: tamanho do raio do círculo desenhado.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph data-line-656">
+<p>Em seguida, define-se dois arrays (xrange e yrange) que servirão para identificar elementos das imagem de referência, sendo configurados como uma fração da totalidade de pixels da imagem, como forma de não se ter sobrecarga visual. A função np.arange faz o preenchimento do array recebendo como parâmetros o início, o fim e o tamanho do incremendo, nessa ordem. Aqui é onde se usa o STEP.</p>
+</div>
+<div class="listingblock data-line-659">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">np.random.shuffle(xrange)
+for i in xrange:
+    np.random.shuffle(yrange)
+    for j in yrange:
+        x = i + np.random.randint((2 * JITTER) - JITTER + 1)
+        y = j + np.random.randint((2 * JITTER) - JITTER + 1)
+        cor = img[x, y]
+        point = cv.circle(point, (y, x), RAIO, (int(cor[0]), int(cor[1]), int(cor[2])), -1, lineType=cv.LINE_AA)
+cv.imshow('POINTILHISMO', point)
+return point</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-672">
+<p>A função Shuffle foi responsável por embaralhar os índices das linhas da imagem e, em seguida, foi percorrida cada linha da imagem e embaralhado os índices das colunas. Por fim, é eleito um ponto aleatório, de deslocamento cálculado a partir do JITTER, e se desenha um círculo com a função cv.circle utilizando a cor do pixel selecionado.</p>
+</div>
+<div class="paragraph data-line-674">
+<p>Resultado:</p>
+</div>
+<div class="imageblock data-line-678">
+<div class="content">
+<img src="./canny%20pointilhismo/uvaspontilhismo.png" alt="Canny">
+</div>
+<div class="title">Figure 20. Imagem pontilhista aleatória</div>
+</div>
+</div>
+<div class="sect2 data-line-680">
+<h3 id="_2_3_união_das_técnicnas">2.3. União das técnicnas</h3>
+<div class="paragraph data-line-682">
+<p>Por fim, para juntar as técnicas utilizou-se a imagem pontilhista gerada como "fundo" e a partir dos pontos retornados pelo algoritmo de Canny, fizemos o desenho deles em 6 tamanhos diferentes. Assim, obtivemos uma imagem que mantem os padrões da técnica e que traz um efeito melhor visualmente para locais importantes para a imagem.</p>
+</div>
+<div class="imageblock data-line-686">
+<div class="content">
+<img src="./canny%20pointilhismo/uvaspontilhismocanny.png" alt="Canny">
+</div>
+<div class="title">Figure 21. Resultado final</div>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-582">
+</div>
+<div class="sect1 data-line-688">
 <h2 id="_8_quantização_vetorial_com_k_means">8. Quantização vetorial com k-means</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-583">
-<p>Em breve</p>
+<div class="paragraph data-line-689">
+<p>Quantização vetorial é o nome das técnicas usadas para agrupamento de dados dentro de um determinado conjunto, formando diversos conjuntos menores, representado por um centróide. A quantização vetorial é comumente usado para compressão de dados.</p>
+</div>
+<div class="paragraph data-line-691">
+<p>Dentre essas técnicas, a mais conhecida e utilizada nos programa é a do K-Means, em que se particiona o espaço N-dimensional em células de Voronoi e cada célula é determinada por um centro. O conjunto de todos os pontos no espaço tem a distância para o seu centro menor que a distância para outros centros.</p>
+</div>
+<div class="paragraph data-line-693">
+<p>Conforme representado pelo professor Agostinho Brito, os passos do algoritmo são:</p>
+</div>
+<div class="olist arabic data-line-695">
+<ol class="arabic">
+<li class="data-line-695">
+<p>Escolha k como o número de classes para os vetores xi de N amostras, i=1,2,&#8230;&#8203;,N.</p>
+</li>
+<li class="data-line-697">
+<p>Escolha m1,m2,&#8230;&#8203;,mk como aproximações iniciais para os centros das classes.</p>
+</li>
+<li class="data-line-699">
+<p>Classifique cada amostra xi usando, por exemplo, um classificador de distância mínima (distância euclideana).</p>
+</li>
+<li class="data-line-701">
+<p>Recalcule as médias mj usando o resultado do passo anterior.</p>
+</li>
+<li class="data-line-703">
+<p>Se as novas médias são consistentes (não mudam consideravelmente), finalize o algoritmo. Caso contrário, recalcule os centros e refaça a classificação.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock data-line-706">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def kmeans(img):
+    nClusters = 8
+    nRodadas = 1
+
+    altura = img.shape[0]
+    largura = img.shape[1]
+
+    amostras = img.reshape((-1,3))
+    amostras = np.float32(amostras)
+
+    compacidade, rotulos, centros = cv.kmeans(amostras,
+                                    nClusters,
+                                    None,
+                            (cv.TERM_CRITERIA_MAX_ITER | cv.TERM_CRITERIA_EPS, 10000, 0.0001),
+                                    nRodadas,
+                                    cv.KMEANS_RANDOM_CENTERS)
+
+    centros = np.uint8(centros)
+    resultado = centros[rotulos.flatten()]
+    resultado = resultado.reshape(img.shape)
+
+    return resultado</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-731">
+<p>Foi criada uma função que pudesse realizar os passos solicitados na questão, pegando e repassando os parâmetros solicitados pela função padrão cv.kmeans do OpenCV. Foi predefinido 8 cluster e 1 rodada, conforme enunciado da atividade.</p>
+</div>
+<div class="paragraph data-line-733">
+<p>O código que define as amostras redimensiona a imagem e agrupa todos os pixels em em colunas e quantidade linhas igual a quantidade de pixels da imagem, além de transformar os dados em float 32.</p>
+</div>
+<div class="paragraph data-line-735">
+<p>Após isso, aplica-se os parâmetros dentro da função cv.kmeans na seguinte sequência: amostras, quantidade de clusters, critérios, números de tentativas e flag. Os critérios definidos fazem com que o algorito pare quando atingir 10.000 iterações ou uma acurárica de 99,9999% e o flag determinada que os centros iniciais são definidos de forma aleatória pelo algoritmo.</p>
+</div>
+<div class="paragraph data-line-737">
+<p>A função cv.kmeans retorna três resultados: a compacidade, os rótulos e os centros.</p>
+</div>
+<div class="listingblock data-line-740">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    centros = np.uint8(centros)
+    resultado = centros[rotulos.flatten()]
+    resultado = resultado.reshape(img.shape)</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-746">
+<p>Por fim, transformamos o resultado dos centros em int8, aplicamos os rótulos com a função flatten() que transforma a matriz em um array unidimensional e, como último passo, redimensiona a imagem de acordo com as dimensões da imagem original.</p>
+</div>
+<div class="listingblock data-line-749">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def main():
+    img = cv.imread('cupcakes.jpg', cv.IMREAD_COLOR)
+
+    for a in range(1, 11):
+        rodada = kmeans(img)
+        cv.imshow(f'Rodada {a}', rodada)
+
+    cv.waitKey()
+    cv.destroyAllWindows()</code></pre>
+</div>
+</div>
+<div class="paragraph data-line-760">
+<p>Para concluir tudo que foi solicitado, a função criada foi executada 10 vezes como forma de comparar os resultados. O que se pode observar é que sempre que for executado de forma aleatória o algoritmo irá retornar um resultado diferente, por isso a necessidade de fazê-lo mais de uma vez a fim de escolher o que obteve o melhor resultado de acordo com o objetivo.</p>
+</div>
+<div class="imageblock data-line-764">
+<div class="content">
+<img src="./kmeans/cupcakes.jpg" alt="Cupcakes">
+</div>
+<div class="title">Figure 22. Imagem utilizada</div>
+</div>
+<div class="imageblock data-line-768">
+<div class="content">
+<img src="./kmeans/cupcakekmeans.png" alt="Cupcakes K-Means">
+</div>
+<div class="title">Figure 23. Resultados</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-06 00:20:52 -0300
+Last updated 2022-07-04 22:21:24 -0300
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
