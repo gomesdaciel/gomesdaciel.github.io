@@ -1,4 +1,4 @@
 ## Tópicos:
 
 #### [PDI](https://gomesdaciel.github.io/PDI)
-#### [PDI](https://gomesdaciel.github.io/trabalho_final)
+#### [Trabalho Final](https://gomesdaciel.github.io/trabalho_final)
